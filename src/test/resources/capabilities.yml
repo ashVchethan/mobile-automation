@@ -1,0 +1,19 @@
+android:
+  platformName: Android
+  automationName: UiAutomator2
+  appPackage: com.test.androidapp.dev
+  appActivity: com.test.androidapp.SplashActivity
+  newCommandTimeout: 100
+  fullReset: true
+  appWaitForLaunch: false
+  autoGrantPermissions: true
+  adbExecTimeout: 120000
+
+ios:
+  platformName: iOS
+  automationName: XCUITest
+  bundleId:
+  newCommandTimeout: 50
+  noReset: false
+  autoAcceptAlerts: true
+  wdaLaunchTimeout: 60000
