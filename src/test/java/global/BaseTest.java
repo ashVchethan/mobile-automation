@@ -20,6 +20,7 @@ public class BaseTest {
     public void tearDown() {
         // TODO: Add code to reset user session
         // quit the driver
+        // new driver
         DriverManager.quitDriver();
     }
 }
