@@ -11,12 +11,6 @@ import org.testng.annotations.BeforeMethod;
 public class BaseTest {
     protected String platformName = PathConstants.PLATFORM;
 
-    //    @BeforeSuite(alwaysRun = true)
-    //    public void runPreRequisites() {
-    //
-    //        DBUtils.checkDBConnection();
-    //    }
-
     @BeforeMethod(alwaysRun = true)
     public void initializeDriver() {
         DriverFactory.createDriver(platformName);
