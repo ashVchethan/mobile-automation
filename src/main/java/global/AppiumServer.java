@@ -10,12 +10,15 @@ public class AppiumServer {
     // final static String scriptPath =
     // System.getProperty("user.dir") + "/run/scripts/";
 
+    private static final int PORT = 4723;
+
     private static AppiumDriverLocalService service;
 
     public static void startServer() throws IOException, InterruptedException {
+        killProcessOnPort(PORT);
         AppiumServiceBuilder builder = new AppiumServiceBuilder();
         builder.withIPAddress("127.0.0.1")
-                .usingPort(4723)
+                .usingPort(PORT)
                 .withArgument(GeneralServerFlag.LOG_LEVEL, "error");
         service = AppiumDriverLocalService.buildService(builder);
         service.start();
@@ -51,5 +54,13 @@ public class AppiumServer {
         );
         builder.start();
         */
+    }
+
+    private static void killProcessOnPort(int port) throws IOException, InterruptedException {
+        ProcessBuilder builder =
+                new ProcessBuilder(
+                        "/bin/bash", "-c", "lsof -ti tcp:" + port + " | xargs kill -9");
+        Process process = builder.start();
+        process.waitFor();
     }
 }

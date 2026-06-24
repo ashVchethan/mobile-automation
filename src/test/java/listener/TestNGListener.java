@@ -2,6 +2,8 @@ package listener;
 
 import constants.PathConstants;
 
+import driver.DriverManager;
+
 import global.AppiumServer;
 
 import helper.DeviceManager;
@@ -12,6 +14,7 @@ import org.testng.ISuiteListener;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
 
+import utilities.CommonUtils;
 import utilities.SlackReportUtil;
 
 import java.io.IOException;
@@ -26,7 +29,7 @@ public class TestNGListener implements IExecutionListener, ITestListener, ISuite
 
     private int totalTestCases, totalTestCasesPassed, totalTestCasesFailed, totalTestCasesSkipped;
 
-    private static final List<String> e2eCasesExceptions = new ArrayList<>();
+    private static final List<String> failedCasesExceptions = new ArrayList<>();
 
     private static String slackExceptionString = "";
 
@@ -64,20 +67,22 @@ public class TestNGListener implements IExecutionListener, ITestListener, ISuite
 
     @Override
     public void onTestFailure(ITestResult iTestResult) {
-        String[] groups = iTestResult.getMethod().getGroups();
         totalTestCasesFailed++;
-        for (String group : groups) {
-            if (group.toLowerCase().contains("e2e")) {
-                e2eCasesExceptions.add(
-                        new String[] {
-                                    iTestResult.getMethod().getMethodName(),
-                                    iTestResult.getThrowable().getMessage(),
-                                    Arrays.toString(iTestResult.getThrowable().getStackTrace())
-                                }
-                                .toString());
-                break;
-            }
+        try {
+            CommonUtils.takeScreenshotAndSave(
+                    DriverManager.getDriver(),
+                    System.getProperty("user.dir") + "/screenshots",
+                    iTestResult.getMethod().getMethodName());
+        } catch (Exception e) {
+            System.out.println("Failed to capture screenshot: " + e.getMessage());
         }
+        failedCasesExceptions.add(
+                new String[] {
+                            iTestResult.getMethod().getMethodName(),
+                            iTestResult.getThrowable().getMessage(),
+                            Arrays.toString(iTestResult.getThrowable().getStackTrace())
+                        }
+                        .toString());
     }
 
     @Override
@@ -95,7 +100,7 @@ public class TestNGListener implements IExecutionListener, ITestListener, ISuite
         System.out.println("Total test cases skipped : " + totalTestCasesSkipped);
         System.out.println(
                 "------Test Suite : " + iSuite.getName() + " has finished executing------\n");
-        SlackReportUtil.sendReportToSlack(iSuite, e2eCasesExceptions);
+        SlackReportUtil.sendReportToSlack(iSuite, failedCasesExceptions);
     }
 
     @Override
