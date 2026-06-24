@@ -6,4 +6,8 @@ public class LoginCredentials {
     public LoginCredentials(String mobileNumber) {
         this.mobileNumber = mobileNumber;
     }
+
+    public String getMobileNumber() {
+        return mobileNumber;
+    }
 }
