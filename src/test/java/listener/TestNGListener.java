@@ -1,5 +1,7 @@
 package listener;
 
+import com.aventstack.extentreports.Status;
+
 import constants.PathConstants;
 
 import driver.DriverManager;
@@ -14,10 +16,14 @@ import org.testng.ISuiteListener;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
 
+import report.ExtentManager;
+
 import utilities.CommonUtils;
 import utilities.SlackReportUtil;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -57,22 +63,30 @@ public class TestNGListener implements IExecutionListener, ITestListener, ISuite
     @Override
     public void onTestStart(ITestResult iTestResult) {
         System.out.println("Test under execution: " + iTestResult.getMethod().getMethodName());
+        ExtentManager.startTest(iTestResult.getMethod().getMethodName());
     }
 
     @Override
     public void onTestSuccess(ITestResult iTestResult) {
         totalTestCasesPassed++;
+        ExtentManager.getTest().log(Status.PASS, "Test passed");
         // TODO: Update the success test count and test duration
     }
 
     @Override
     public void onTestFailure(ITestResult iTestResult) {
         totalTestCasesFailed++;
+        ExtentManager.getTest().log(Status.FAIL, iTestResult.getThrowable());
         try {
-            CommonUtils.takeScreenshotAndSave(
-                    DriverManager.getDriver(),
-                    System.getProperty("user.dir") + "/screenshots",
-                    iTestResult.getMethod().getMethodName());
+            String screenshotPath =
+                    CommonUtils.takeScreenshotAndSave(
+                            DriverManager.getDriver(),
+                            System.getProperty("user.dir") + "/screenshots",
+                            iTestResult.getMethod().getMethodName());
+            Path reportsDir = Paths.get(System.getProperty("user.dir"), "reports");
+            String relativeScreenshotPath =
+                    reportsDir.relativize(Paths.get(screenshotPath)).toString();
+            ExtentManager.getTest().addScreenCaptureFromPath(relativeScreenshotPath);
         } catch (Exception e) {
             System.out.println("Failed to capture screenshot: " + e.getMessage());
         }
@@ -88,6 +102,7 @@ public class TestNGListener implements IExecutionListener, ITestListener, ISuite
     @Override
     public void onTestSkipped(ITestResult iTestResult) {
         totalTestCasesSkipped++;
+        ExtentManager.getTest().log(Status.SKIP, "Test skipped");
     }
 
     @Override
@@ -100,6 +115,7 @@ public class TestNGListener implements IExecutionListener, ITestListener, ISuite
         System.out.println("Total test cases skipped : " + totalTestCasesSkipped);
         System.out.println(
                 "------Test Suite : " + iSuite.getName() + " has finished executing------\n");
+        ExtentManager.flush();
         SlackReportUtil.sendReportToSlack(iSuite, failedCasesExceptions);
     }
 
