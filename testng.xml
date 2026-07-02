@@ -13,4 +13,18 @@
         </classes>
     </test>
 
+    <test name="HighLevelTest">
+        <parameter name="platform" value="android"/>
+        <classes>
+            <class name="highlevel.HighLevelTest"/>
+        </classes>
+    </test>
+
+    <test name="WebHighLevelTest">
+        <parameter name="platform" value="android"/>
+        <classes>
+            <class name="web.HighLevelTest"/>
+        </classes>
+    </test>
+
 </suite>
